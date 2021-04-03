@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id='app' style='color: red;'>
+        hello {{person.name}} {{person.age}} 
+        <span>{{arr}}</span>
+    </div>
+    <script src="../dist/vue.js"></script>
+    <script>
+
+        Vue.mixin({
+            created: function a() {
+                console.log('created mixin');
+            }
+        })
+        Vue.mixin({
+            created: function b() {
+                console.log('created mixin');
+            }
+        })
+        
+        /**
+         * vue的渲染操作
+         * 1、默认会先找render方法
+         * 2、默认没有传入render方法会查找template
+         * 3、如果也没有template就找到当前el指定的元素中的内容来进行渲染
+         * ast进行解析template，会将template转成render函数
+        */
+        const vm = new Vue({
+            el: '#app', // 等价于vm.$mount('#app')
+            data() {
+                return {
+                    arr: [1, 2, 3],
+                    person: {
+                        name: 'wz',
+                        age: 18
+                    }
+                }
+            },
+            created() { // 会订阅一些事件，后续会触发此方法，可以理解为回掉函数
+                console.log('created my');
+            }
+        })
+       
+    </script>
+</body>
+</html>
