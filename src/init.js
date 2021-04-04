@@ -1,6 +1,8 @@
 import { initState } from './state';
 import { compileToFunctions } from './compiler/index';
 import { mountComponent } from './lifecycle';
+import { mergeOptions } from './utils';
+import { callHook } from './lifecycle';
 
 export function initMixin(Vue) {
 
@@ -9,10 +11,14 @@ export function initMixin(Vue) {
 
         const vm = this;
 
-        vm.$options = options;
+        vm.$options = mergeOptions(vm.constructor.options, options); // 需要将用户自定义options与全局的mixin的options做合并
+
+        callHook(vm, 'beforeCreate');
 
         // 初始化状态（将数据做一个初始化劫持，当数据改变时会更新页面） vue核心特性，响应式数据原理
         initState(vm);
+
+        callHook(vm, 'created');
 
         // 如果当前有el属性说明需要渲染模版
         if (vm.$options.el) {
@@ -29,8 +35,6 @@ export function initMixin(Vue) {
         const options = vm.$options
 
         el = document.querySelector(el);
-
-        vm.$el = el;
 
         if (!options.render) {
 
@@ -49,7 +53,11 @@ export function initMixin(Vue) {
             options.render = render;  // 渲染时都是用的这个render方法
         }
 
+        callHook(vm, 'beforeMount');
+
         // 需要挂载这个组件
         mountComponent(vm, el);
+
+        callHook(vm, 'mounted');
     }
 }

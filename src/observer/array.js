@@ -19,6 +19,8 @@ methods.forEach(method => {
 
     arrayMethods[method] = function(...args) {
 
+        // 调用数组劫持的方法后，页面应该更新
+
         // this就是调用方法的值，就是observe的value
         const result = oldArrayProtoMethods[method].apply(this, args);
 
@@ -39,8 +41,11 @@ methods.forEach(method => {
         }
 
         if (inserted) {
+
             ob.observeArray(inserted);
         }
+
+        ob.dep.notify(); // 通知数组更新
 
         return result;
     }

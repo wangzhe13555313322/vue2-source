@@ -14,6 +14,8 @@ export function patch(oldVnode, vnode) {
     parentElm.insertBefore(el, oldVnode.nextSibling); // 真实元素插入老得节点元素的后面
 
     parentElm.removeChild(oldVnode); // 删除老得节点
+
+    return el;
 }
 
 function createEl(vnode) {

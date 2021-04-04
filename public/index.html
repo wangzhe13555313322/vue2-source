@@ -7,7 +7,6 @@
 </head>
 <body>
     <div id='app' style='color: red;'>
-        hello {{person.name}} {{person.age}} 
         <span>{{arr}}</span>
     </div>
     <script src="../dist/vue.js"></script>
@@ -35,18 +34,18 @@
             el: '#app', // 等价于vm.$mount('#app')
             data() {
                 return {
-                    arr: [1, 2, 3],
-                    person: {
-                        name: 'wz',
-                        age: 18
-                    }
+                    arr: [1, 2, 3]
                 }
             },
             created() { // 会订阅一些事件，后续会触发此方法，可以理解为回掉函数
                 console.log('created my');
             }
         })
-       
+        setTimeout(() => {
+            // vm.arr.push(123)
+        }, 1000)
+        // vm._update(vm._render())
+        // vue更新策略是以组件为单位的，给每个组件增加一个watcher，属性变化会重新渲染，调用这个watcher进行更新（渲染watcher）
     </script>
 </body>
 </html>

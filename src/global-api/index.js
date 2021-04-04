@@ -10,6 +10,5 @@ export function initGlobalApi(Vue) {
         // TODO 只先考虑生命周期， 不考虑data computed 等
         this.options = mergeOptions(this.options, mixin); // 合并对象
 
-        console.log(this.options);
     }
 }

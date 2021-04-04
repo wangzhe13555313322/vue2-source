@@ -35,8 +35,6 @@ const strats = {}; // 策略对象
 
 function mergeHook(parentVal, childVal) { // 生命周期的合并
 
-    console.log(parentVal)
-
     if (childVal) {
 
         if (parentVal) {
@@ -58,6 +56,12 @@ LIFECYCLE_HOOKS.forEach(hook => {
 
     strats[hook] = mergeHook;
 })
+
+strats.data = function(parentVal, childVal) {
+
+    // TODO 这里应该有合并data的方式，暂时
+    return childVal
+}
 
 export function mergeOptions(parent, child) {
 
@@ -82,6 +86,10 @@ export function mergeOptions(parent, child) {
         if (strats[key]) {
 
             options[key] = strats[key](parent[key], child[key]);
+
+        } else {
+
+            options[key] = child[key];
         }
     }
 
