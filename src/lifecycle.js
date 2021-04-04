@@ -7,8 +7,21 @@ export function lifecycleMixin(Vue) {
     Vue.prototype._update = function(vnode) {
 
         const vm = this;
-        
+
+        const prevVnode = vm._vnode; // 第一次渲染时不存在
+
+        if (!prevVnode) { // 首次渲染
+
+            vm.$el = patch(vm.$el, vnode); // 用新的创建的元素替换老得元素
+
+        } else {
+
+            // vm.$el = patch(prevVnode, vnode); // 更新diff算法
+        }
+
         vm.$el = patch(vm.$el, vnode); // 用新的创建的元素替换老得元素
+
+        vm._vnode = vnode; // 保存当前的vnode以便下一次进行比对
     }
 }
 

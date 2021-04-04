@@ -37,12 +37,18 @@ export default Dep;
 
 Dep.target = null; // 因为js编译过程会对class进行提升，taget这个静态属性会一直存在内存中
 
+let stack = [];
+
 export function pushTarget(wathcer) { // 保留watcher
 
     Dep.target = wathcer;
+
+    stack.push(wathcer); // 可能哟渲染watcher 还有其他的watcher
 }
 
 export function popTarget() { // 将变量删除
 
-    Dep.target = null;
+    stack.pop();
+
+    Dep.target = stack[stack.length - 1];
 }

@@ -17,6 +17,10 @@ class Watcher {
 
         this.user = options.user; // 这是一个用户watcher
 
+        this.lazy = options.lazy; // 如果这个watcher有lazy属性，说明是计算属性
+
+        this.dirty = this.lazy; // 取值时候，是否执行用户提供的方法
+
         this.isWatcher = typeof options === 'boolean';
 
         this.id = id++; // watcher的唯一标志
@@ -47,14 +51,14 @@ class Watcher {
             }
         }
 
-        this.value = this.get(); // 默认调用get方法
+        this.value = this.lazy ? void(0) : this.get(); // 默认调用get方法
     }
 
     get() { // 调用表达式方法
 
         pushTarget(this); // this表示当前实例
 
-        let result = this.getter(); // 调用exprOrFn方法，渲染页面
+        let result = this.getter.call(this.vm); // 调用exprOrFn方法，渲染页面
 
         popTarget();
 
@@ -85,7 +89,32 @@ class Watcher {
 
     update() { // 更新操作
 
-        queueWatcher(this); // 暂存
+        if (this.lazy) { // 是计算属性
+
+            this.dirty = true;
+
+        } else { // 不是计算属性
+
+            queueWatcher(this); // 暂存
+        }
+    }
+
+    evaluate() {
+
+        this.value = this.get();
+
+        this.dirty = false; // 取过一次的值后，标识为取值完成
+    }
+
+    depend() {
+
+        // watcher会存储dep dep会存储watcher 
+        let i = this.deps.length;
+
+        while(i--) {
+
+            this.deps[i].depend();
+        }
     }
 
     run() { // watcher执行

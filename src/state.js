@@ -1,4 +1,5 @@
 import { nextTick } from './nextTick';
+import Dep from './observer/dep';
 import { observe } from './observer/index'
 import Watcher from './observer/watcher';
 import { proxy } from './utils'
@@ -43,6 +44,79 @@ function initData(vm) {
 }
 
 function initComputed(vm) {
+
+    /**
+     * 1、需要一个watcher
+     * 2、需要用defineProperty进行劫持
+     * 3、需要一个dirty属性
+     */
+
+    let computed = vm.$options.computed;
+
+    const watcher = vm._computedWatchers = {};
+
+    for (let key in computed) {
+
+        const userDef = computed[key];
+
+        const getter = typeof userDef === 'function' ? userDef : userDef.get; // 获取get方法,watcher使用
+
+        watcher[key] = new Watcher(vm, getter, () => {}, { lazy: true }); // watcher是懒的
+
+        defineComputed(vm, key, userDef);
+    }
+}
+
+
+function defineComputed(target, key, userDef) {
+
+    const sharedPropertyDefinition = {
+
+        enumerable: true,
+
+        configurable: true,
+
+        get: () => {},
+
+        set: () => {}
+    };
+
+    if (typeof userDef === 'function') {
+
+        sharedPropertyDefinition.get = createComputedGetter(key);
+
+    } else {
+
+        sharedPropertyDefinition.get = userDef.createComputedGetter(key); // 需要添加缓存
+
+        sharedPropertyDefinition.set = userDef.set;
+    }
+
+    Object.defineProperty(target, key, sharedPropertyDefinition);
+}
+
+function createComputedGetter(key) {
+
+    return function() { // 此方法是包装的方法，没去取值多次调用这个方法
+
+        const watcher = this._computedWatchers[key]; // 拿到这个属性对应的watcher
+
+        if (watcher) {
+
+            if (watcher.dirty) { // 默认是true
+
+                watcher.evaluate();
+            }
+
+            if (Dep.target) { // 说明有渲染watcher，也应该进行收集
+
+                watcher.depend();
+            }
+
+            return watcher.value; // 默认返回值
+        }
+    }
+
 }
 
 function initWatch(vm) {

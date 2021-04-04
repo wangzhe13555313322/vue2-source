@@ -9,6 +9,7 @@
     <div id='app' style='color: red;'>
         <span>{{arr}}</span>
         <span>{{a}}</span>
+        <span>--------{{c}}</span>
     </div>
     <script src="../dist/vue.js"></script>
     <script>
@@ -24,7 +25,8 @@
             el: '#app', // 等价于vm.$mount('#app')
             data() {
                 return {
-                    a: 1,
+                    a: 18,
+                    b: 12,
                     arr: [1, 2, 3]
                 }
             },
@@ -36,13 +38,23 @@
              * 4、handler的写法
              */
             watch: {
-                a(newVal, oldVal) {
-                    console.log(newVal, oldVal)
+                a(newVal, oldVal) { }
+            },
+            /**
+             * 计算属性内部也是用了defineProperty，内部有一个dirty
+             * computed还是一个watcher，内部依赖属性会收集这个watcher
+             */
+            computed: {
+                c() {
+                    console.log(123)
+                    return this.a + this.b
                 }
             }
         })
 
-        vm.a = 100;
+        setTimeout(() => {
+            vm.a = 100
+        }, 1000)
         // vue更新策略是以组件为单位的，给每个组件增加一个watcher，属性变化会重新渲染，调用这个watcher进行更新（渲染watcher）
     </script>
 </body>
