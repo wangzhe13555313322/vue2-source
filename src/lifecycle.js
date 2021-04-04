@@ -23,7 +23,11 @@ export function mountComponent(vm, el) {
     }
 
     // 这个watcher是用于渲染的, true为渲染watcher的标志
-    new Watcher(vm, updateComponent, () => {}, true);
+    new Watcher(vm, updateComponent, () => {
+
+        callHook(vm, 'updated');
+
+    }, true);
 }
 
 // 调用生命周期函数

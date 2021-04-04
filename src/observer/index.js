@@ -5,7 +5,6 @@ import Dep from './dep';
 class Observer {
 
     constructor(value) {
-        console.log(value)
 
         this.dep = new Dep(); // 这个dep是相当于给劫持的对象或者数组给了一个dep属性
 
@@ -64,12 +63,11 @@ function defineReative(data, key, value) {
 
             if (Dep.target) {
 
-
                 dep.depend();
 
                 if (childDep) {
 
-                    dep.depend(); // 数组存放起来了这个渲染watcher
+                    childDep.dep.depend(); // 数组存放起来了这个渲染watcher
                 }
             }
 
@@ -79,6 +77,7 @@ function defineReative(data, key, value) {
         set(newValue) {
 
             if (newValue === value) {
+
                 return;
             }
 
@@ -95,15 +94,17 @@ export function observe (data) {
 
     // observe是递归解析的过程，初始化进来的时候，data永远是一个object类型
     // 当递归解析data里面的数据的时候才存在array类型
-
     if (typeof data !== 'object' && data !== null) {
+
         return;
     }
 
     // 表示这个数据已经被观察过了
     if (data.__ob__) { 
+
         return data;
     }
+
     return new Observer(data);
 
 }

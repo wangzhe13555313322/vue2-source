@@ -1,3 +1,4 @@
+import { nextTick } from "../nextTick";
 import { popTarget, pushTarget } from "./dep";
 
 let id = 0;
@@ -14,6 +15,10 @@ class Watcher {
 
         this.options = options;
 
+        this.user = options.user; // 这是一个用户watcher
+
+        this.isWatcher = typeof options === 'boolean';
+
         this.id = id++; // watcher的唯一标志
 
         this.depsId = new Set();
@@ -23,21 +28,40 @@ class Watcher {
         if (typeof exprOrFn === 'function') {
 
             this.getter = exprOrFn;
+
+        } else {
+
+            this.getter = function() {
+
+                // 当在当前实例上取值的时候才会触发依赖收集
+                let path = exprOrFn.split('.');
+
+                let obj = vm;
+
+                for (let i = 0; i < path.length; i++) {
+
+                    obj = obj[path[i]];
+                }
+
+                return obj;
+            }
         }
 
-        this.get(); // 默认调用get方法
+        this.value = this.get(); // 默认调用get方法
     }
 
-    get() {
+    get() { // 调用表达式方法
 
         pushTarget(this); // this表示当前实例
 
-        this.getter(); // 调用exprOrFn方法，渲染页面
+        let result = this.getter(); // 调用exprOrFn方法，渲染页面
 
         popTarget();
+
+        return result;
     }
 
-    addDep(dep) {
+    addDep(dep) { // 添加和dep的相互依赖
 
         const id = dep.id;
         
@@ -59,9 +83,67 @@ class Watcher {
 
     }
 
-    update() {
+    update() { // 更新操作
+
+        queueWatcher(this); // 暂存
+    }
+
+    run() { // watcher执行
+
+        let newValue = this.get();
+
+        let oldValue = this.value;
+
+        if (this.user) {
+
+            this.cb.call(this.vm, newValue, oldValue);
+        }
+    }
+}
+
+let queue = []; // 将需要更新的watcher存到一个队列中，稍后让watcher执行
+
+let has = {};
+
+let pending = false;
+
+function flushScheduleQueue() {
+
+    queue.forEach(watcher => {
         
-        this.get(); // 重新渲染
+        watcher.run();
+
+        if (watcher.isWatcher) {
+
+            watcher.cb();
+        }
+
+    });
+
+    queue = [];
+
+    has = {};
+
+    pending = false;
+}
+
+function queueWatcher(watcher) {
+
+    const id = watcher.id;
+
+    if (!has[id]) {
+
+        queue.push(watcher);
+
+        has[id] = true;
+
+        if (!pending) {
+
+            nextTick(flushScheduleQueue);
+
+            pending = true;
+        }
+        
     }
 }
 

@@ -3,9 +3,11 @@ export function proxy(vm, data, key) {
     Object.defineProperty(vm, key, {
 
         get() {
+
             return vm[data][key]
         },
         set(val) {
+            
             vm[data][key] = val;
         }
     })
@@ -26,7 +28,7 @@ export const LIFECYCLE_HOOKS = [ // 生命周期队列
     'beforeMount',
     'mounted',
     'beforeUpdate',
-    'update',
+    'updated',
     'beforeDestory',
     'destory'
 ]
@@ -59,7 +61,7 @@ LIFECYCLE_HOOKS.forEach(hook => {
 
 strats.data = function(parentVal, childVal) {
 
-    // TODO 这里应该有合并data的方式，暂时
+    // TODO 这里应该有合并data的方式
     return childVal
 }
 
@@ -92,7 +94,6 @@ export function mergeOptions(parent, child) {
             options[key] = child[key];
         }
     }
-
 
     return options;
 }
